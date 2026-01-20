@@ -9,9 +9,9 @@ def retrieve_context(state: ZenState) -> dict:
 
     service = (
         root
-        .databases[os.getenv("DATABASE")]
-        .schemas[os.getenv("SCHEMA")]
-        .cortex_search_services[os.getenv("CORTEX_SEARCH_SERVICE")]
+        .databases[os.getenv("SNOWFLAKE_DATABASE")]
+        .schemas[os.getenv("SNOWFLAKE_SCHEMA")]
+        .cortex_search_services[os.getenv("SNOWFLAKE_CORTEX_SEARCH_SERVICE")]
     )
 
     resp = service.search(
