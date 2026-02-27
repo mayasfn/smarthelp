@@ -1,9 +1,10 @@
-from langchain_openai import ChatOpenAI
+from langchain_mistralai import ChatMistralAI
 import dotenv
 dotenv.load_dotenv()
 
 
-llm = ChatOpenAI(
-    model="openai-gpt-5",
+llm = ChatMistralAI(
+    model="mistral-small-latest",
+    mistral_api_key="uYjtS4EklNWuYR87xB0KLXNiIqxcT4mx",
     temperature=1,
 )

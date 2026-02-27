@@ -7,3 +7,5 @@ snowflake-snowpark-python>=1.13
 snowflake-core>=0.7.0
 
 python-dotenv>=1.0.1
+mistralai
+lanchain_mistralai
