@@ -17,15 +17,32 @@ def render_user_chat():
             st.rerun()
 
     with nav_col2:
-        st.markdown(
-            f"<h3 style='text-align: center; margin-top: -10px;'>{'Ticket #' + str(st.session_state.ticket_id) if st.session_state.ticket_id else 'New Support Request'}</h3>", 
-            unsafe_allow_html=True
-        )
+        if st.session_state.ticket_id:
+            priority = st.session_state.get("priority", "LOW")
+            p_color = {"URGENT": "#ef4444", "HIGH": "#f97316", "MEDIUM": "#3b82f6", "LOW": "#22c55e"}.get(priority)
+            
+            st.markdown(
+                f"""
+                <div style='text-align: center; margin-top: -10px;'>
+                    <h3 style='margin-bottom: 0;'>Ticket #{st.session_state.ticket_id}</h3>
+                    <span style='background-color: {p_color}; color: white; padding: 2px 10px; 
+                                 border-radius: 12px; font-size: 0.8rem; font-weight: bold; 
+                                 text-transform: uppercase;'>
+                        {priority}
+                    </span>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                "<h3 style='text-align: center; margin-top: -10px;'>New Support Request</h3>", 
+                unsafe_allow_html=True
+            )
 
     with nav_col3:
         if st.session_state.ticket_id:
             if st.button("Close Ticket", type="primary"):
-                # Reset ticket state and go home
                 st.toast(f"Ticket #{st.session_state.ticket_id} has been closed!")
                 st.session_state.ticket_id = None
                 st.session_state.messages = []
@@ -65,7 +82,7 @@ def render_user_chat():
                 response_state = run_agent(prompt, st.session_state.ticket_id)
                 
                 st.session_state.ticket_id = response_state.get("ticket_id")
-                
+                st.session_state.priority = response_state.get("priority", "LOW")
                 new_msg = {
                     "role": "assistant",
                     "content": response_state["response"],
