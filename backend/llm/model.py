@@ -13,5 +13,4 @@ llm = ChatMistralAI(
     mistral_api_key=os.getenv("OPENAI_API_KEY"),
     temperature=1,
     api_key=os.getenv("OPENAI_API_KEY"),
-    base_url=base_url if base_url else None
 )

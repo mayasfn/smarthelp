@@ -1,13 +1,13 @@
 from langgraph.graph import StateGraph, START, END
-from graph.state import ZenState
-from graph.router import route_ticket
+from backend.graph.state import ZenState
+from backend.graph.router import route_ticket
 
-from graph.nodes.priority import evaluate_priority
-from graph.nodes.retrieve import retrieve_context
-from graph.nodes.generate import generate_response
-from graph.nodes.ticket_create import create_ticket
-from graph.nodes.ticket_update import update_ticket
-from graph.nodes.message_store import store_agent_message
+from backend.graph.nodes.priority import evaluate_priority
+from backend.graph.nodes.retrieve import retrieve_context
+from backend.graph.nodes.generate import generate_response
+from backend.graph.nodes.ticket_create import create_ticket
+from backend.graph.nodes.ticket_update import update_ticket
+from backend.graph.nodes.message_store import store_agent_message
 
 graph = StateGraph(ZenState)
 

@@ -1,5 +1,5 @@
-from graph.state import ZenState
-from db.zen_repo import ZenRepository
+from backend.graph.state import ZenState
+from backend.db.zen_repo import ZenRepository
 
 def store_agent_message(state: ZenState) -> dict:
     repo = ZenRepository()
