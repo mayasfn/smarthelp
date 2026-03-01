@@ -7,6 +7,7 @@ class ZenState(TypedDict, total=False):
     priority: str
     context: List[str]
     response: str
-
+    
+    is_resolved: bool
     is_new_ticket: bool
     
