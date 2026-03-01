@@ -1,5 +1,5 @@
 import streamlit as st
-from backend.agent_mock import run_agent_mock
+from backend.agent import run_agent
 
 def render_user_chat():
     # --- STATE INIT ---
@@ -61,15 +61,16 @@ def render_user_chat():
                 st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Processing..."):
-                response = run_agent_mock(prompt, st.session_state.ticket_id)
+            with st.spinner("..."):
+                response_state = run_agent(prompt, st.session_state.ticket_id)
                 
-                st.session_state.ticket_id = response.get("ticket_id")
+                st.session_state.ticket_id = response_state.get("ticket_id")
+                
                 new_msg = {
                     "role": "assistant",
-                    "content": response["response"],
-                    "ticket_id": response.get("ticket_id"),
-                    "priority": response.get("priority", "LOW"),
+                    "content": response_state["response"],
+                    "ticket_id": response_state.get("ticket_id"),
+                    "priority": response_state.get("priority", "LOW"),
                 }
                 st.session_state.messages.append(new_msg)
                 st.rerun()
