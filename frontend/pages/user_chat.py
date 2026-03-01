@@ -99,22 +99,25 @@ def render_user_chat():
                     )
 
     # --- CHAT INPUT ---
-    if prompt := st.chat_input("Describe your issue..."):
+    if prompt := st.chat_input("Describe your issue...", key="user_input_widget"):
         st.session_state.error_message = None
         st.session_state.messages.append({"role": "user", "content": prompt})
-        
-        with chat_box:
-            with st.chat_message("user"):
-                st.markdown(prompt)
+        st.session_state.processing_agent = True
+        st.rerun()
+
+    # --- AGENT PROCESSING ---
+    if st.session_state.get("processing_agent"):
+        st.session_state.processing_agent = False
 
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 try:
-                    response_state = run_agent(prompt, st.session_state.ticket_id)
-                    
+                    last_user_prompt = st.session_state.messages[-1]["content"]
+                    response_state = run_agent(last_user_prompt, st.session_state.ticket_id)
+
                     st.session_state.ticket_id = response_state.get("ticket_id")
                     st.session_state.priority = response_state.get("priority", "LOW")
-                    
+
                     new_msg = {
                         "role": "assistant",
                         "content": response_state["response"],
@@ -125,6 +128,5 @@ def render_user_chat():
                     st.rerun()
 
                 except Exception as e:
-                    print(f"CRITICAL AGENT ERROR: {e}")
-                    st.session_state.error_message = e
-                    st.error(st.session_state.error_message)
+                    st.session_state.error_message = str(e)
+                    st.rerun() 
