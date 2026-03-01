@@ -1,17 +1,17 @@
 from backend.db.zen_repo import ZenRepository
+from backend.graph.state import ZenState
 
-def check_for_resolution(state: dict):
+def check_for_resolution(state: ZenState):
     ticket_id = state.get("ticket_id")
-    # Check the flag returned by the merged generate_response node
     is_resolved = state.get("is_resolved", False)
 
     if ticket_id and is_resolved:
         repo = ZenRepository()
-        # Update Snowflake status to CLOSED
         repo.session.sql(
             "UPDATE ZEN_TICKETS SET STATUS = 'CLOSED' WHERE TICKET_ID = ?",
             params=[ticket_id]
         ).collect()
-        return {"status": "CLOSED"}
+        repo.close_ticket(ticket_id)
+        return {}
     
     return {}

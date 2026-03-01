@@ -23,6 +23,7 @@ RULES:
 4. If the priority is URGENT, start by acknowledging the urgency.
 5. If the user's latest input indicates their problem is fully resolved 
     or if they are expressing final satisfaction (e.g., 'thank you', 'that worked') then include in your response that you are closing the ticket and mark the issue as resolved.
+6. Always answer in the same language as the user's message.
 """
     user_string = f"""
 Priority: {state.get('priority', 'LOW')}
