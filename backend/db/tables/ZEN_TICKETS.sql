@@ -1,4 +1,4 @@
-CREATE TABLE ZEN_TICKETS (
+CREATE TABLE ZEN_TICKETS IF NOT EXISTS (
     ticket_id STRING,
     subject STRING,
     priority STRING,
