@@ -1,6 +1,6 @@
 from typing import Optional
 
-from graph.graph import ticket_agent
+from backend.graph.graph import ticket_agent
 
 
 def run_agent(user_message: str, ticket_id: Optional[str] = None):

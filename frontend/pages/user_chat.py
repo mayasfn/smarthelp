@@ -1,5 +1,5 @@
 import streamlit as st
-from backend.agent_mock import run_agent_mock
+from backend.agent import run_agent
 
 def render_user_chat():
     # --- STATE INIT ---
@@ -7,6 +7,8 @@ def render_user_chat():
         st.session_state.messages = []
     if "ticket_id" not in st.session_state:
         st.session_state.ticket_id = None
+    if "error_message" not in st.session_state:
+        st.session_state.error_message = None
 
     # --- TOP NAVIGATION BAR ---
     nav_col1, nav_col2, nav_col3 = st.columns([1, 2, 1])
@@ -14,29 +16,54 @@ def render_user_chat():
     with nav_col1:
         if st.button("🏠 Home"):
             st.session_state.page = "home"
+            st.session_state.error_message = None # Clear errors on nav
             st.rerun()
 
     with nav_col2:
-        st.markdown(
-            f"<h3 style='text-align: center; margin-top: -10px;'>{'Ticket #' + str(st.session_state.ticket_id) if st.session_state.ticket_id else 'New Support Request'}</h3>", 
-            unsafe_allow_html=True
-        )
+        if st.session_state.ticket_id:
+            priority = st.session_state.get("priority", "LOW")
+            p_color = {"URGENT": "#ef4444", "HIGH": "#f97316", "MEDIUM": "#3b82f6", "LOW": "#22c55e"}.get(priority)
+            
+            st.markdown(
+                f"""
+                <div style='text-align: center; margin-top: -10px;'>
+                    <h3 style='margin-bottom: 0;'>Ticket #{st.session_state.ticket_id}</h3>
+                    <span style='background-color: {p_color}; color: white; padding: 2px 10px; 
+                                 border-radius: 12px; font-size: 0.8rem; font-weight: bold; 
+                                 text-transform: uppercase;'>
+                        {priority}
+                    </span>
+                </div>
+                """, 
+                unsafe_allow_html=True
+            )
+        else:
+            st.markdown(
+                "<h3 style='text-align: center; margin-top: -10px;'>New Support Request</h3>", 
+                unsafe_allow_html=True
+            )
 
     with nav_col3:
         if st.session_state.ticket_id:
             if st.button("Close Ticket", type="primary"):
-                # Reset ticket state and go home
                 st.toast(f"Ticket #{st.session_state.ticket_id} has been closed!")
                 st.session_state.ticket_id = None
                 st.session_state.messages = []
+                st.session_state.error_message = None
                 st.session_state.page = "home"
                 st.rerun()
 
     st.divider()
 
+    # --- ERROR DISPLAY ---
+    if st.session_state.error_message:
+        st.error(st.session_state.error_message)
+        if st.button("Clear Error"):
+            st.session_state.error_message = None
+            st.rerun()
+
     # --- MESSAGE RENDERER ---
     chat_box = st.container()
-
     with chat_box:
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
@@ -54,6 +81,7 @@ def render_user_chat():
 
     # --- CHAT INPUT ---
     if prompt := st.chat_input("Describe your issue..."):
+        st.session_state.error_message = None
         st.session_state.messages.append({"role": "user", "content": prompt})
         
         with chat_box:
@@ -61,15 +89,23 @@ def render_user_chat():
                 st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("Processing..."):
-                response = run_agent_mock(prompt, st.session_state.ticket_id)
-                
-                st.session_state.ticket_id = response.get("ticket_id")
-                new_msg = {
-                    "role": "assistant",
-                    "content": response["response"],
-                    "ticket_id": response.get("ticket_id"),
-                    "priority": response.get("priority", "LOW"),
-                }
-                st.session_state.messages.append(new_msg)
-                st.rerun()
+            with st.spinner("Thinking..."):
+                try:
+                    response_state = run_agent(prompt, st.session_state.ticket_id)
+                    
+                    st.session_state.ticket_id = response_state.get("ticket_id")
+                    st.session_state.priority = response_state.get("priority", "LOW")
+                    
+                    new_msg = {
+                        "role": "assistant",
+                        "content": response_state["response"],
+                        "ticket_id": response_state.get("ticket_id"),
+                        "priority": response_state.get("priority", "LOW"),
+                    }
+                    st.session_state.messages.append(new_msg)
+                    st.rerun()
+
+                except Exception as e:
+                    print(f"CRITICAL AGENT ERROR: {e}")
+                    st.session_state.error_message = e
+                    st.error(st.session_state.error_message)
