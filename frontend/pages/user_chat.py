@@ -7,6 +7,8 @@ def render_user_chat():
         st.session_state.messages = []
     if "ticket_id" not in st.session_state:
         st.session_state.ticket_id = None
+    if "error_message" not in st.session_state:
+        st.session_state.error_message = None
 
     # --- TOP NAVIGATION BAR ---
     nav_col1, nav_col2, nav_col3 = st.columns([1, 2, 1])
@@ -14,6 +16,7 @@ def render_user_chat():
     with nav_col1:
         if st.button("🏠 Home"):
             st.session_state.page = "home"
+            st.session_state.error_message = None # Clear errors on nav
             st.rerun()
 
     with nav_col2:
@@ -46,14 +49,21 @@ def render_user_chat():
                 st.toast(f"Ticket #{st.session_state.ticket_id} has been closed!")
                 st.session_state.ticket_id = None
                 st.session_state.messages = []
+                st.session_state.error_message = None
                 st.session_state.page = "home"
                 st.rerun()
 
     st.divider()
 
+    # --- ERROR DISPLAY ---
+    if st.session_state.error_message:
+        st.error(st.session_state.error_message)
+        if st.button("Clear Error"):
+            st.session_state.error_message = None
+            st.rerun()
+
     # --- MESSAGE RENDERER ---
     chat_box = st.container()
-
     with chat_box:
         for msg in st.session_state.messages:
             with st.chat_message(msg["role"]):
@@ -71,6 +81,7 @@ def render_user_chat():
 
     # --- CHAT INPUT ---
     if prompt := st.chat_input("Describe your issue..."):
+        st.session_state.error_message = None
         st.session_state.messages.append({"role": "user", "content": prompt})
         
         with chat_box:
@@ -78,16 +89,23 @@ def render_user_chat():
                 st.markdown(prompt)
 
         with st.chat_message("assistant"):
-            with st.spinner("..."):
-                response_state = run_agent(prompt, st.session_state.ticket_id)
-                
-                st.session_state.ticket_id = response_state.get("ticket_id")
-                st.session_state.priority = response_state.get("priority", "LOW")
-                new_msg = {
-                    "role": "assistant",
-                    "content": response_state["response"],
-                    "ticket_id": response_state.get("ticket_id"),
-                    "priority": response_state.get("priority", "LOW"),
-                }
-                st.session_state.messages.append(new_msg)
-                st.rerun()
+            with st.spinner("Thinking..."):
+                try:
+                    response_state = run_agent(prompt, st.session_state.ticket_id)
+                    
+                    st.session_state.ticket_id = response_state.get("ticket_id")
+                    st.session_state.priority = response_state.get("priority", "LOW")
+                    
+                    new_msg = {
+                        "role": "assistant",
+                        "content": response_state["response"],
+                        "ticket_id": response_state.get("ticket_id"),
+                        "priority": response_state.get("priority", "LOW"),
+                    }
+                    st.session_state.messages.append(new_msg)
+                    st.rerun()
+
+                except Exception as e:
+                    print(f"CRITICAL AGENT ERROR: {e}")
+                    st.session_state.error_message = e
+                    st.error(st.session_state.error_message)

@@ -1,11 +1,15 @@
 import streamlit as st
 from backend.db.zen_repo import ZenRepository
 
+@st.cache_resource
+def get_repo():
+    return ZenRepository()
+
 def render_past_tickets():
     st.markdown("## 📂 Your Ticket History")
     
     try:
-        repo = ZenRepository()
+        repo = get_repo()
         tickets = repo.get_all_tickets() 
         
         if not tickets:
@@ -14,7 +18,6 @@ def render_past_tickets():
                 st.session_state.page = "user_chat"
                 st.rerun()
         else:
-            # We use a dataframe for a nice, interactive table
             st.dataframe(
                 tickets,
                 column_config={
