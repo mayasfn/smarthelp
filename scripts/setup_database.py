@@ -78,22 +78,12 @@ def load_resolved_tickets_data(session):
 
 
 def get_sql_files():
-    """Get and categorize SQL files"""
-    tables_dir = Path(__file__).parent.parent / "backend" / "db" / "tables"
-    sql_files = sorted(tables_dir.glob("*.sql"))
+    """Get SQL files organized by directory structure"""
+    db_dir = Path(__file__).parent.parent / "backend" / "db"
     
-    table_files = []
-    view_files = []
-    cortex_files = []
-    
-    for f in sql_files:
-        content = f.read_text().upper()
-        if "CREATE TABLE" in content or "CREATE OR REPLACE TABLE" in content:
-            table_files.append(f)
-        elif "CORTEX SEARCH SERVICE" in content:
-            cortex_files.append(f)
-        else:
-            view_files.append(f)
+    table_files = sorted((db_dir / "tables").glob("*.sql"))
+    view_files = sorted((db_dir / "views").glob("*.sql"))
+    cortex_files = sorted((db_dir / "cortex_search_services").glob("*.sql"))
     
     return table_files, view_files, cortex_files
 
