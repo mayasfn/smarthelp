@@ -1,0 +1,168 @@
+section[data-testid="stSidebar"] {
+    display: none;
+}
+
+header {
+    visibility: hidden;
+}
+
+.block-container {
+    padding-top: 0rem !important;
+    padding-bottom: 0rem !important;
+    padding-left: 0rem !important;
+    padding-right: 0rem !important;
+}
+.hero h1 {
+    font-size: 48px;
+    margin-bottom: 10px;
+}
+
+.hero h2 {
+    font-weight: 300;
+    margin-bottom: 40px;
+}
+
+/* Raise a Problem button */
+div.stButton>button {
+    height: 56px;
+    font-size: 18px;
+    background-color: #e53935;
+    color: white;
+    border-radius: 30px;
+    border: none;
+}
+
+/* Hover */
+div.stButton>button:hover {
+    background-color: #c62828;
+}
+
+/* --- Cards / Forms --- */
+div[data-testid="stForm"] {
+    display: flex;
+    justify-content: center;
+    justify-items: center;
+    align-content: center;
+    align-items: center;
+    background: rgb(255, 255, 255);
+    padding: 30px;
+    border-radius: 12px;
+    border: 1px solid #e6e9ef;
+    min-height: 320px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    flex-direction: column;
+    text-align: center;
+    font-size: 16px !important;
+}
+
+div[data-testid="stForm"]>div {
+    width: 100%;
+    max-width: 420px;
+}
+
+/* Inputs */
+div[data-testid="stForm"] input {
+    border: none !important;
+    background-color: #f5f7fb;
+    border-radius: 8px;
+}
+
+/* Button wrapper */
+div[data-testid="stFormSubmitButton"] {
+    display: flex;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+/* Button */
+div[data-testid="stFormSubmitButton"] button {
+    background-color: #1f6fd1 !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 8px !important;
+    height: 48px !important;
+    min-width: 180px !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+div[data-testid="stFormSubmitButton"] button div p {
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1 !important;
+}
+
+div[data-testid="stForm"] button:hover {
+    background-color: #195bb0;
+}
+
+div[data-testid="stHorizontalBlock"] .stMarkdown p {
+    margin-bottom: 0px;
+}
+
+/* --- Card Typography --- */
+div[data-testid="stForm"] h3 {
+    font-size: 22px !important;
+}
+
+div[data-testid="stForm"] p {
+    font-size: 16px !important;
+}
+
+/* --- Layout Adjustments --- */
+section[data-testid="stHorizontalBlock"] {
+    max-width: 900px;
+    margin: 0 auto;
+    gap: 3rem !important;
+}
+
+/* --- KB Centering --- */
+.kb {
+    margin-top: 40px;
+    background: #f5f8fc;
+    padding: 25px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.kb-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #e0e6ef;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.kb-item:last-child {
+    border-bottom: none;
+}
+
+.stChatInput {
+    padding-bottom: 20px !important;
+    background-color: white !important;
+}
+
+[data-testid="stChatMessage"] {
+    background-color: #f8f9fb;
+    border-radius: 15px;
+}
+
+[data-testid="stChatMessageAssistant"] {
+    border-left: 4px solid #1f6fd1;
+}
+[data-testid="column"] button {
+    height: 38px !important;
+    font-size: 14px !important;
+    border-radius: 8px !important;
+}
+
+button[kind="primary"] {
+    background-color: #2e7d32 !important;
+    border: none !important;
+}
+
+.stChatFloatingInputContainer {
+    bottom: 20px;
+}
