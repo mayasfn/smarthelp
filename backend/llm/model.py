@@ -1,7 +1,6 @@
 from langchain_mistralai import ChatMistralAI
 import dotenv
 import os
-import sys
 
 dotenv.load_dotenv()
 

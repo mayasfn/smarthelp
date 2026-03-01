@@ -1,5 +1,5 @@
-from ..state import ZenState
-from ...db.zen_repo import ZenRepository
+from graph.state import ZenState
+from db.zen_repo import ZenRepository
 
 def create_ticket(state: ZenState) -> dict:
     repo = ZenRepository()
