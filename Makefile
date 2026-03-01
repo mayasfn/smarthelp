@@ -6,3 +6,6 @@ venv:
 
 run_agent:
 	PYTHONPATH=.:backend python scripts/chat_with_agent.py
+
+setup_db:
+	PYTHONPATH=.:backend python scripts/setup_database.py
