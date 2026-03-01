@@ -27,3 +27,17 @@ class ZenRepository:
             role,
             content
         ]).collect()
+
+    def get_all_tickets(self):
+        query = """
+            SELECT 
+                TICKET_ID, 
+                SUBJECT, 
+                PRIORITY, 
+                STATUS, 
+                CREATED_AT 
+            FROM ZEN_TICKETS 
+            ORDER BY CREATED_AT DESC
+        """
+        results = self.session.sql(query).collect()        
+        return [row.as_dict() for row in results]
