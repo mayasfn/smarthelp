@@ -8,6 +8,7 @@ class ZenState(TypedDict, total=False):
     context: List[str]
     response: str
     
+    messages: List[dict]
     is_resolved: bool
     is_new_ticket: bool
     
