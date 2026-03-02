@@ -7,10 +7,6 @@ def check_for_resolution(state: ZenState):
 
     if ticket_id and is_resolved:
         repo = ZenRepository()
-        repo.session.sql(
-            "UPDATE ZEN_TICKETS SET STATUS = 'CLOSED' WHERE TICKET_ID = ?",
-            params=[ticket_id]
-        ).collect()
         repo.close_ticket(ticket_id)
         return {}
     

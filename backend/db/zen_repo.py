@@ -34,9 +34,10 @@ class ZenRepository:
                 SUBJECT, 
                 PRIORITY, 
                 STATUS, 
-                CREATED_AT 
+                CREATED_AT,
+                UPDATED_AT
             FROM ZEN_TICKETS 
-            ORDER BY CREATED_AT DESC
+            ORDER BY UPDATED_AT DESC
         """
         results = self.session.sql(query).collect()        
         return [row.as_dict() for row in results]
@@ -60,3 +61,15 @@ class ZenRepository:
             role = "user" if row['ROLE'] == 'USER' else "assistant"
             messages.append({"role": role, "content": row['CONTENT']})
         return messages
+
+    def close_ticket(self, ticket_id: str):
+        """Updates ticket status to CLOSED and sets UPDATED_AT timestamp."""
+        if not ticket_id:
+            return
+            
+        self.session.sql("""
+            UPDATE ZEN_TICKETS 
+            SET STATUS = 'CLOSED', 
+                UPDATED_AT = CURRENT_TIMESTAMP() 
+            WHERE TICKET_ID = ?
+        """, params=[ticket_id]).collect()

@@ -3,97 +3,111 @@ from backend.db.zen_repo import ZenRepository
 
 def render_admin_dashboard():
     repo = ZenRepository()
-    st.title("🎫 Admin Ticket Dashboard")
-
-    # --- TOP CONTROLS ---
-    col1, col2 = st.columns([2, 1])
     
-    with col1:
-        # Filter tabs
-        filter_tab = st.segmented_control(
-            "Filter Status", 
-            options=["All", "OPEN", "CLOSED"], 
+    # Custom CSS for UI Toggles
+    st.markdown("""
+        <style>
+        div[data-testid="stSegmentedControl"] button[aria-checked="true"] {
+            background-color: #2e7d32 !important;
+            color: white !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    st.title("🎫 Administrator Dashboard")
+
+    # --- FILTERS & SORTING ---
+    top_col1, top_col2, top_col3 = st.columns([2, 2, 1])
+    with top_col1:
+        # Filter Toggle with visual status cues
+        filter_status = st.segmented_control(
+            "Filter by Status",
+            options=["All", "OPEN", "CLOSED"],
             default="All"
         )
-    
-    with col2:
-        sort_by = st.selectbox(
+
+    with top_col2:
+        sort_col = st.selectbox(
             "Sort By", 
-            options=["Created At", "Priority", "Status", "Subject"]
+            options=["Last updated", "Creation Date", "Priority", "Status", "Subject"]
         )
 
-    # --- DATA FETCHING ---
-    tickets = repo.get_all_tickets() #
-    
-    # Filtering
-    if filter_tab != "All":
-        tickets = [t for t in tickets if t['STATUS'] == filter_tab]
+    with top_col3:
+        sort_order = st.radio("Order", ["DESC", "ASC"], horizontal=True)
+
+    tickets = repo.get_all_tickets()
+    if filter_status != "All":
+        tickets = [t for t in tickets if t['STATUS'] == filter_status]
 
     # Sorting Logic
     priority_map = {"URGENT": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
-    if sort_by == "Priority":
-        tickets.sort(key=lambda x: priority_map.get(x['PRIORITY'], 4))
-    elif sort_by == "Status":
-        tickets.sort(key=lambda x: x['STATUS'])
-    elif sort_by == "Subject":
-        tickets.sort(key=lambda x: x['SUBJECT'])
-    else: # Created At
-        tickets.sort(key=lambda x: x['CREATED_AT'], reverse=True)
+    rev = True if sort_order == "DESC" else False
+    if sort_col == "Priority":
+        tickets.sort(key=lambda x: priority_map.get(x['PRIORITY'], 4), reverse=rev)
+    elif sort_col == "Last updated":
+        tickets.sort(key=lambda x: x.get('UPDATED_AT') or x['CREATED_AT'], reverse=rev)
+    elif sort_col == "Creation Date":
+        tickets.sort(key=lambda x: x['CREATED_AT'], reverse=rev)
+    else:
+        tickets.sort(key=lambda x: str(x.get(sort_col.upper(), "")), reverse=rev)
+
+    st.divider()
 
     # --- CARD GRID ---
     if not tickets:
-        st.info("No tickets found matching these criteria.")
+        st.info("No tickets found.")
     else:
         cols = st.columns(3)
-        for idx, ticket in enumerate(tickets):
+        for idx, t in enumerate(tickets):
             with cols[idx % 3]:
-                p_color = {
-                    "URGENT": "#ef4444", 
-                    "HIGH": "#f97316", 
-                    "MEDIUM": "#3b82f6", 
-                    "LOW": "#22c55e"
-                }.get(ticket['PRIORITY'], "#6c757d")
+                p_color = {"URGENT": "#ef4444", "HIGH": "#f97316", "MEDIUM": "#3b82f6", "LOW": "#22c55e"}.get(t['PRIORITY'], "#6c757d")
+                status_bg = "#d4edda" if t['STATUS'] == 'OPEN' else "#f8d7da"
+                status_text = "#155724" if t['STATUS'] == 'OPEN' else "#721c24"
                 
-                status_color = "#28a745" if ticket['STATUS'] == "OPEN" else "#6c757d"
+                updated_val = t.get('UPDATED_AT') or t['CREATED_AT']
 
-                st.markdown(
-                    f"""
-                    <div style="
-                        border: 1px solid #ddd; 
-                        border-radius: 10px; 
-                        padding: 15px; 
-                        margin-bottom: 20px; 
-                        background-color: #f9f9f9;
-                        min-height: 200px;
-                    ">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="font-size: 0.8rem; color: #666;">ID: {ticket['TICKET_ID'][:8]}</span>
-                            <span style="background: {status_color}; color: white; padding: 2px 8px; border-radius: 5px; font-size: 0.7rem;">{ticket['STATUS']}</span>
-                        </div>
-                        <h4 style="margin: 10px 0;">{ticket['SUBJECT'][:60]}{'...' if len(ticket['SUBJECT']) > 60 else ''}</h4>
-                        <div style="margin-top: 10px;">
-                            <span style="color: {p_color}; font-weight: bold; font-size: 0.8rem;">● {ticket['PRIORITY']} Priority</span>
-                        </div>
-                        <div style="font-size: 0.75rem; color: #888; margin-top: 5px;">
-                            Last Activity: {ticket['CREATED_AT'].strftime('%Y-%m-%d %H:%M')}
-                        </div>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
+                raw_subject = str(t.get('SUBJECT', '')).strip()
+                display_subject = raw_subject if len(raw_subject) > 10 else "[No Subject]"
                 
-                # Action Buttons
-                btn_col1, btn_col2 = st.columns(2)
-                with btn_col1:
-                    if st.button("Open Chat", key=f"chat_{ticket['TICKET_ID']}", use_container_width=True):
-                        st.session_state.ticket_id = ticket['TICKET_ID']
-                        st.session_state.page = "user_chat"
-                        st.rerun()
-                with btn_col2:
-                    if ticket['STATUS'] == "OPEN":
-                        if st.button("Close", key=f"close_{ticket['TICKET_ID']}", type="primary", use_container_width=True):
-                            repo.session.sql(
-                                "UPDATE ZEN_TICKETS SET STATUS = 'CLOSED' WHERE TICKET_ID = ?", 
-                                params=[ticket['TICKET_ID']]
-                            ).collect()
+                with st.container(border=True):
+                    st.markdown(f"""
+                        <div style='display: flex; justify-content: space-between; align-items: center;'>
+                            <code style='color: #888;'>#{t['TICKET_ID'][:8]}</code>
+                            <span style='background-color: {status_bg}; color: {status_text}; 
+                                  padding: 2px 10px; border-radius: 20px; font-size: 0.7rem; 
+                                  font-weight: bold;'>{t['STATUS']}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+
+                    st.markdown(f"""
+                        <div style='height: 60px; overflow: hidden; margin-top: 10px;'>
+                            <h3 style='margin: 0; font-size: 1.15rem;'>{display_subject[:50]}...</h3>
+                        </div>
+                    """, unsafe_allow_html=True)
+                    
+                    st.markdown(f"**Priority:** <span style='color:{p_color};'>{t['PRIORITY']}</span>", unsafe_allow_html=True)
+                    
+                    st.markdown(f"""
+                        <p style='font-style: italic; font-size: 0.8rem; color: #666; margin-bottom: 0;'>
+                            Last updated: {updated_val.strftime('%Y-%m-%d %H:%M')}
+                        </p>
+                        <p style='font-style: italic; font-size: 0.8rem; color: #666; margin-top: 0;'>
+                            Creation: {t['CREATED_AT'].strftime('%Y-%m-%d %H:%M')}
+                        </p>
+                    """, unsafe_allow_html=True)
+
+                    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+                    btn_col1, btn_col2 = st.columns(2)
+                    with btn_col1:
+                        if st.button("💬 Open", key=f"open_{t['TICKET_ID']}", use_container_width=True):
+                            st.session_state.ticket_id = t['TICKET_ID']
+                            st.session_state.page = "user_chat"
                             st.rerun()
+                    with btn_col2:
+                        if t['STATUS'] == 'OPEN':
+                            if st.button("🛑 Close", key=f"close_{t['TICKET_ID']}", type="primary", use_container_width=True):
+                                repo.close_ticket(t['TICKET_ID'])
+                                st.rerun()
+                        else:
+                            st.button("Closed", key=f"dis_{t['TICKET_ID']}", disabled=True, use_container_width=True)
