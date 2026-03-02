@@ -1,12 +1,19 @@
 from pydantic import BaseModel, Field
 from backend.graph.state import ZenState
 from backend.llm.model import llm
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 # Define the structured format
 class AssistantResponse(BaseModel):
     answer: str = Field(description="The helpful response to the user.")
     is_resolved: bool = Field(description="True if the user's issue is resolved.")
+
+def map_role(db_role):
+    if db_role == "USER":
+        return "human"
+    if db_role in ["AGENT_AI", "AGENT_HUMAN"]:
+        return "assistant"
+    return "human"
 
 def generate_response(state: ZenState) -> dict:
     context = "\n---\n".join(state.get("context", []))
@@ -34,15 +41,15 @@ Helpful Answer:
 """
 
     messages = [
-        SystemMessage(content=system_instructions),
-        *state.get("messages", []), # Include history for context
-        HumanMessage(content=user_string)
+    SystemMessage(content=system_instructions),
+    *[ (AIMessage(content=m["content"]) if map_role(m["role"]) == "assistant" 
+        else HumanMessage(content=m["content"])) 
+       for m in state.get("messages", []) ],
+    HumanMessage(content=state['user_message'])
     ]
     
-    # 2. Single LLM call for BOTH answer and resolution
     result = structured_llm.invoke(messages)
     
-    # Return both the response text and a resolution flag to the graph state
     return {
         "response": result.answer,
         "is_resolved": result.is_resolved
