@@ -6,10 +6,10 @@ ROOT_DIR = Path(__file__).resolve().parents[1]  # ticket_agent/
 if str(ROOT_DIR) not in sys.path:
     sys.path.insert(0, str(ROOT_DIR))
 
-from pages.user_home import render_home
-from pages.past_tickets import render_past_tickets
-from pages.user_chat import render_user_chat
-from pages.admin_dashboard import render_admin_dashboard
+from views.user_home import render_home
+from views.past_tickets import render_past_tickets
+from views.user_chat import render_user_chat
+from views.admin_dashboard import render_admin_dashboard
 
 # --- CONFIG ---
 st.set_page_config(

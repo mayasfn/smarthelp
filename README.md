@@ -1,6 +1,6 @@
 # 🎫 Ticket Agent
 
-An intelligent support ticket agent powered by **LangGraph** and **Snowflake Cortex**. This agent automatically handles customer support inquiries by evaluating priority, retrieving relevant context using semantic search, and generating helpful responses.
+An intelligent multi-role support ticket agent powered by **LangGraph** and **Snowflake Cortex** and **STreamlit**. This system automates the lifecycle of a support ticket—from initial AI-driven triage and priority classification to human-in-the-loop administrative resolution.
 
 ## ✨ Features
 
@@ -9,6 +9,29 @@ An intelligent support ticket agent powered by **LangGraph** and **Snowflake Cor
 - **AI-Powered Responses** – Generates helpful, context-aware support responses using LLMs
 - **Ticket Management** – Creates new tickets or updates existing conversations
 - **Conversation History** – Stores all messages for audit and continuity
+
+### 👥 **Dual-Role Interface**
+
+The system features a **unified routing architecture** in `frontend/app.py` that allows seamless switching between two distinct user experiences, managed via a global sidebar toggle.
+
+#### 👤 **User Experience**
+
+- **Support Desk Landing**: A dedicated home page to **raise new problems** or check the status of existing ones.
+- **Live Status Tracking**: Real-time ticket lookups with **direct "Open Chat" links** to resume active conversations.
+- **Ticket History**: A searchable, tabular overview of all **personal past tickets** for easy reference.
+- **AI-Driven Chat**: Direct interaction with the **Mistral-powered agent** for immediate troubleshooting and automated triage.
+
+#### 🔑 **Administrator Dashboard**
+
+- **Queue Management**: A comprehensive view of all system tickets with **visual color indicators** for priority (URGENT to LOW) and status.
+- **Advanced Triage**: Built-in tools to **filter the queue** by status (OPEN/CLOSED) and sort by urgency, subject, or update recency.
+- **Human-in-the-Loop Override**: Admins can enter any active chat thread to provide **manual assistance** alongside the AI agent.
+- **One-Click Resolution**: Streamlined controls to **close resolved tickets** directly from the dashboard or within the chat view.
+
+#### 💬 **Hybrid Chat System**
+
+- **Shared Interface**: Both roles utilize the same `user_chat.py` component, ensuring a **consistent history** of both AI and human responses.
+- **Visual Role Cues**: The chat interface identifies messages from **"Users," "AI Agents," and "Human Agents" (Admins)** using distinct avatars and alignments to maintain clarity.
 
 ## 🏗️ Architecture
 
@@ -74,6 +97,20 @@ ticket_agent/
 │   │   └── nodes/                   # Individual graph nodes
 │   └── llm/
 │       └── model.py                 # LLM configuration
+├── frontend/
+│   ├── app.py                       # Global Router & Sidebar Logic
+│   ├── views/                       # Frontend View Modules
+│   │   ├── user_home.py             # User Home page with access to all features
+│   │   ├── user_chat.py             # Unified AI/Human Chat Interface
+│   │   ├── admin_dashboard.py       # Admin Queue & Filtering UI
+│   │   ├── past_tickets.py          # User Ticket History View
+│   ├── graph/
+│   │   ├── graph.py                 # LangGraph workflow definition
+│   │   ├── router.py                # Conditional routing logic
+│   │   ├── state.py                 # State schema definition
+│   │   └── nodes/                   # Individual graph nodes
+│   └── llm/
+│       └── model.py                 # LLM configuration
 ├── scripts/
 │   ├── setup_db.py                  # Database setup script
 │   └── chat_with_agent.py           # CLI chat interface
@@ -92,6 +129,7 @@ ticket_agent/
 - Python 3.10+
 - Snowflake account with Cortex enabled
 - Mistral API key (used in `backend/llm/model.py`, you can change the code to use another LLM)
+- Environment: Ensure your .env contains your Snowflake credentials and MISTRAL_API_KEY
 
 ### Installation
 
