@@ -1,4 +1,4 @@
-.PHONY: venv run_agent
+.PHONY: venv run_agent setup_db app
 
 venv:
 	python3 -m venv venv

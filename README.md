@@ -15,57 +15,71 @@ An intelligent support ticket agent powered by **LangGraph** and **Snowflake Cor
 The agent uses a LangGraph state machine with the following workflow:
 
 ```
-┌─────────┐    ┌──────────┐    ┌──────────┐    ┌────────────────┐
-│  START  │───▶│ Priority │───▶│ Retrieve │───▶│    Generate    │
-└─────────┘    └──────────┘    └──────────┘    └───────┬────────┘
-                                                       │
-                                          ┌────────────┴────────────┐
-                                          ▼                         ▼
-                                  ┌──────────────┐         ┌──────────────┐
-                                  │ Create Ticket│         │Update Ticket │
-                                  └──────┬───────┘         └──────┬───────┘
-                                         │                        │
-                                         └──────────┬─────────────┘
-                                                    ▼
-                                          ┌──────────────────┐
-                                          │ Store Agent Msg  │
-                                          └────────┬─────────┘
-                                                   ▼
-                                              ┌─────────┐
-                                              │   END   │
-                                              └─────────┘
+┌─────────┐    ┌──────────────┐    ┌──────────┐    ┌──────────┐    ┌────────────────┐
+│  START  │───▶│Load History  │───▶│ Priority │───▶│ Retrieve │───▶│    Generate    │
+└─────────┘    └──────────────┘    └──────────┘    └──────────┘    └───────┬────────┘
+                                                                            │
+                                                               ┌────────────┴────────────┐
+                                                               ▼                         ▼
+                                                       ┌──────────────┐         ┌──────────────┐
+                                                       │ Create Ticket│         │Update Ticket │
+                                                       └──────┬───────┘         └──────┬───────┘
+                                                              │                        │
+                                                              └──────────┬─────────────┘
+                                                                         ▼
+                                                               ┌──────────────────┐
+                                                               │ Store Agent Msg  │
+                                                               └────────┬─────────┘
+                                                                        ▼
+                                                               ┌──────────────────┐
+                                                               │Check for Resolve │
+                                                               └────────┬─────────┘
+                                                                        ▼
+                                                                   ┌─────────┐
+                                                                   │   END   │
+                                                                   └─────────┘
 ```
 
 ### Nodes
 
 | Node | Description |
 |------|-------------|
+| `load_history` | Loads past ticket messages |
 | `priority` | Classifies the user message priority using an LLM |
 | `retrieve` | Fetches relevant context from Snowflake Cortex Search |
 | `generate` | Generates a support response based on priority and context |
 | `create_ticket` | Creates a new ticket in the database |
 | `update_ticket` | Adds a message to an existing ticket |
 | `store_agent_message` | Persists the agent's response |
+| `check_for_resolution` | Checks if the issue is resolved and updates ticket status |
 
 ## 📁 Project Structure
 
 ```
 ticket_agent/
 ├── backend/
-│   ├── agent.py              # Main agent entry point
+│   ├── agent.py                     # Main agent entry point
 │   ├── db/
-│   │   ├── snowflake.py      # Snowflake session management
-│   │   ├── zen_repo.py       # Ticket repository operations
-│   │   └── tables/           # SQL table definitions
+│   │   ├── snowflake_utils.py       # Snowflake session management utils
+│   │   ├── sql_utils.py             # SQL execution helpers
+│   │   ├── zen_repo.py              # Ticket repository operations
+│   │   ├── csv/                     # CSV files for sample data
+│   │   ├── tables/                  # SQL table definitions
+│   │   ├── views/                   # SQL view definitions
+│   │   └── cortex_search_services/  # SQL cortex definitions
 │   ├── graph/
-│   │   ├── graph.py          # LangGraph workflow definition
-│   │   ├── router.py         # Conditional routing logic
-│   │   ├── state.py          # State schema definition
-│   │   └── nodes/            # Individual graph nodes
+│   │   ├── graph.py                 # LangGraph workflow definition
+│   │   ├── router.py                # Conditional routing logic
+│   │   ├── state.py                 # State schema definition
+│   │   └── nodes/                   # Individual graph nodes
 │   └── llm/
-│       └── model.py          # LLM configuration
+│       └── model.py                 # LLM configuration
 ├── scripts/
-│   └── chat_with_agent.py    # CLI chat interface
+│   ├── setup_db.py                  # Database setup script
+│   └── chat_with_agent.py           # CLI chat interface
+├── frontend/
+│   ├── app.py                       # Streamlit app entry point
+│   └── pages/                       # Streamlit app pages
 ├── requirements.txt
 ├── Makefile
 └── .env.example
@@ -77,7 +91,7 @@ ticket_agent/
 
 - Python 3.10+
 - Snowflake account with Cortex enabled
-- OpenAI API key (or Snowflake Cortex LLM endpoint)
+- Mistral API key (used in `backend/llm/model.py`, you can change the code to use another LLM)
 
 ### Installation
 
@@ -106,8 +120,7 @@ ticket_agent/
    | `SNOWFLAKE_ACCOUNT` | Your Snowflake account identifier |
    | `SNOWFLAKE_USER` | Snowflake username |
    | `SNOWFLAKE_TOKEN` | Snowflake password/token |
-   | `OPENAI_API_KEY` | API key (same as SNOWFLAKE_TOKEN for Cortex) |
-   | `OPENAI_BASE_URL` | Snowflake Cortex API endpoint |
+   | `MISTRAL_API_KEY` | API key |
    | `SNOWFLAKE_WAREHOUSE` | Compute warehouse name |
    | `SNOWFLAKE_DATABASE` | Database containing your data |
    | `SNOWFLAKE_SCHEMA` | Schema name |
@@ -115,14 +128,11 @@ ticket_agent/
 
 ### Running the Agent
 
-Start the interactive chat interface:
+To test the agent through command line, run:
 
 ```bash
 make run_agent
-```
-
-Or run directly:
-```bash
+# or
 PYTHONPATH=.:backend python scripts/chat_with_agent.py
 ```
 
@@ -131,32 +141,16 @@ PYTHONPATH=.:backend python scripts/chat_with_agent.py
 Start the ticketing system UI:
 
 ```bash
+make app
+# or
 streamlit run frontend/app.py
-```
-
-### Usage Example
-
-```
-Zen agent (type 'exit' to quit)
-
-You: I can't log into my account
-Agent: I understand you're having trouble logging into your account...
-(ticket_id=TKT-001)
-
-You: I tried resetting my password but it didn't work
-Agent: I'm sorry the password reset didn't resolve your issue...
-(ticket_id=TKT-001)
-
-You: exit
 ```
 
 ## 🛠️ Technologies
 
 - **[LangGraph](https://github.com/langchain-ai/langgraph)** – Stateful agent orchestration
 - **[LangChain](https://github.com/langchain-ai/langchain)** – LLM integration
+- **[Snowflake](https://www.snowflake.com)** – Data storage and processing
 - **[Snowflake Cortex](https://www.snowflake.com/en/data-cloud/cortex/)** – Semantic search & LLM inference
-- **[Snowpark](https://docs.snowflake.com/en/developer-guide/snowpark/index)** – Python connector for Snowflake
-
 ## 📄 License
-
-This project is licensed under the MIT License.
+- **[Streamlit](https://streamlit.io/)** - App frontend

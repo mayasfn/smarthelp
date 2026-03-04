@@ -8,7 +8,7 @@ dotenv.load_dotenv()
 
 llm = ChatMistralAI(
     model="mistral-small-latest",
-    mistral_api_key=os.getenv("OPENAI_API_KEY"),
+    mistral_api_key=os.getenv("MISTRAL_API_KEY"),
     temperature=1,
-    api_key=os.getenv("OPENAI_API_KEY"),
+    api_key=os.getenv("MISTRAL_API_KEY"),
 )
