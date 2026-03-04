@@ -100,14 +100,14 @@ def render_admin_dashboard():
 
                     btn_col1, btn_col2 = st.columns(2)
                     with btn_col1:
-                        if st.button("💬 Open", key=f"open_{t['TICKET_ID']}", use_container_width=True):
+                        if st.button("💬 Open", key=f"open_{t['TICKET_ID']}", width='stretch'):
                             st.session_state.ticket_id = t['TICKET_ID']
                             st.session_state.page = "user_chat"
                             st.rerun()
                     with btn_col2:
                         if t['STATUS'] == 'OPEN':
-                            if st.button("🛑 Close", key=f"close_{t['TICKET_ID']}", type="primary", use_container_width=True):
+                            if st.button("🛑 Close", key=f"close_{t['TICKET_ID']}", type="primary", width='stretch'):
                                 repo.close_ticket(t['TICKET_ID'])
                                 st.rerun()
                         else:
-                            st.button("Closed", key=f"dis_{t['TICKET_ID']}", disabled=True, use_container_width=True)
+                            st.button("Closed", key=f"dis_{t['TICKET_ID']}", disabled=True, width='stretch')
