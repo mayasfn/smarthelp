@@ -152,5 +152,4 @@ streamlit run frontend/app.py
 - **[LangChain](https://github.com/langchain-ai/langchain)** – LLM integration
 - **[Snowflake](https://www.snowflake.com)** – Data storage and processing
 - **[Snowflake Cortex](https://www.snowflake.com/en/data-cloud/cortex/)** – Semantic search & LLM inference
-## 📄 License
 - **[Streamlit](https://streamlit.io/)** - App frontend
