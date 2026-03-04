@@ -28,7 +28,7 @@ def render_past_tickets():
                     "CREATED_AT": st.column_config.DatetimeColumn("Date Created")
                 },
                 hide_index=True,
-                use_container_width=True
+                width='stretch'
             )
             
             if st.button("⬅️ Back to Home"):

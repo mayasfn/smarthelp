@@ -71,7 +71,7 @@ def render_home():
 
     col1, col2, col3 = st.columns([1, 3, 1])
     with col2:
-        if st.button("Raise a Problem", use_container_width=True):
+        if st.button("Raise a Problem", width='stretch'):
             st.session_state.messages = []
             st.session_state.loaded_ticket_id = None
             st.session_state.page = "user_chat"
@@ -88,7 +88,7 @@ def render_home():
             st.markdown("<p style='font-size:16px;'>Enter your ID to check status.</p>", unsafe_allow_html=True)
 
             ticket_id = st.text_input("Ticket ID", placeholder="Enter ID...", label_visibility="collapsed")
-            status_submit = st.form_submit_button("View Status", use_container_width=True)
+            status_submit = st.form_submit_button("View Status", width='stretch')
             
             if status_submit and ticket_id.strip():
                 ticket = repo.get_ticket_status(ticket_id.strip())
@@ -105,7 +105,7 @@ def render_home():
                     with col_left:
                          st.markdown(f'<div class="status-text-large">Status: <span style="color:{color};">{status_val}</span></div>', unsafe_allow_html=True)
                     with col_right:
-                         if st.form_submit_button("💬 Open Chat", type="primary", use_container_width=True):
+                         if st.form_submit_button("💬 Open Chat", type="primary", width='stretch'):
                             # Reset history if moving to a different ticket
                             if st.session_state.get("loaded_ticket_id") != ticket_id.strip():
                                 st.session_state.messages = []
@@ -126,7 +126,7 @@ def render_home():
             st.markdown("### 📂 View Past Tickets")
             st.markdown("<p style='font-size:16px;'>Access your full history of previous tickets.</p>", unsafe_allow_html=True)
             st.markdown("<div style='height:60px'></div>", unsafe_allow_html=True)
-            if st.form_submit_button("Browse History", use_container_width=True):
+            if st.form_submit_button("Browse History", width='stretch'):
                 st.session_state.page = "past_tickets"
                 st.rerun()
 
