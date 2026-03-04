@@ -23,26 +23,23 @@ def render_home():
     st.markdown(
            f"""
            <style>
-           {css}   
-           .hero {{
+           {css}
+
+            .hero {{
                 background-image:
-                   linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)),
-                   url("data:image/png;base64,{banner_base64}");   
+                    linear-gradient(rgba(0,0,0,0.25), rgba(0,0,0,0.25)),
+                    url("data:image/png;base64,{banner_base64}");
                 background-size: cover;
                 background-position: center;
-                background-repeat: no-repeat;   
+                background-repeat: no-repeat;
                 padding: 40px 20px;
                 border-radius: 12px;
                 color: white;
                 text-align: center;
-                width: 100vw;
-                position: relative;
-                left: 50%;
-                right: 50%;
-                margin-left: -50vw;
-                margin-right: -50vw;
-                margin-top: 0;
-           }}
+                width: 100%;
+                margin-top: 10px;
+                z-index: 0;
+            }}
            
            .status-text-large {{
                 font-size: 26px !important; 
