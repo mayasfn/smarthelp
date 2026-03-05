@@ -6,13 +6,13 @@ class ZenRepository:
     def __init__(self):
         self.session = get_session()
 
-    def create_ticket(self, subject: str, priority: str) -> str:
+    def create_ticket(self, subject: str, priority: str, type: str, queue: str) -> str:
         ticket_id = str(uuid.uuid4())
 
         self.session.sql("""
             INSERT INTO ZEN_TICKETS
-            VALUES (?, ?, ?, 'OPEN', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())
-        """, params=[ticket_id, subject, priority]).collect()
+            VALUES (?, ?, ?, ?, ?, 'OPEN', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())
+        """, params=[ticket_id, subject, priority, type, queue]).collect()
 
         return ticket_id
 

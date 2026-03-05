@@ -1,14 +1,14 @@
 # 🎫 Ticket Agent
 
-An intelligent multi-role support ticket agent powered by **LangGraph** and **Snowflake Cortex** and **STreamlit**. This system automates the lifecycle of a support ticket—from initial AI-driven triage and priority classification to human-in-the-loop administrative resolution.
+An intelligent multi-role support ticket agent powered by **LangGraph** and **Snowflake Cortex** and **Streamlit**. This system automates the lifecycle of a support ticket—from initial AI-driven triage and priority classification to human-in-the-loop administrative resolution.
 
 ## ✨ Features
 
-- **Priority Classification** – Automatically classifies incoming messages as URGENT, HIGH, MEDIUM, or LOW priority
-- **Semantic Context Retrieval** – Uses Snowflake Cortex Search to find relevant past tickets and knowledge base articles
-- **AI-Powered Responses** – Generates helpful, context-aware support responses using LLMs
-- **Ticket Management** – Creates new tickets or updates existing conversations
-- **Conversation History** – Stores all messages for audit and continuity
+- **Smart New-Ticket Evaluation** – Evaluates new issues (priority + metadata) before ticket creation and response generation
+- **Snowflake Cortex Search** – Retrieves relevant past tickets and knowledge base context to inform responses
+- **AI + Human Support Loop** – Combines AI-generated replies with admin human-in-the-loop intervention in the same chat threads
+- **Lifecycle Tracking & Resolution** – Stores all agent messages and runs resolution checks to keep ticket status up to date
+
 
 ### 👥 **Dual-Role Interface**
 
@@ -37,30 +37,21 @@ The system features a **unified routing architecture** in `frontend/app.py` that
 
 The agent uses a LangGraph state machine with the following workflow:
 
-```
-┌─────────┐    ┌──────────────┐    ┌──────────┐    ┌──────────┐    ┌────────────────┐
-│  START  │───▶│Load History  │───▶│ Priority │───▶│ Retrieve │───▶│    Generate    │
-└─────────┘    └──────────────┘    └──────────┘    └──────────┘    └───────┬────────┘
-                                                                            │
-                                                               ┌────────────┴────────────┐
-                                                               ▼                         ▼
-                                                       ┌──────────────┐         ┌──────────────┐
-                                                       │ Create Ticket│         │Update Ticket │
-                                                       └──────┬───────┘         └──────┬───────┘
-                                                              │                        │
-                                                              └──────────┬─────────────┘
-                                                                         ▼
-                                                               ┌──────────────────┐
-                                                               │ Store Agent Msg  │
-                                                               └────────┬─────────┘
-                                                                        ▼
-                                                               ┌──────────────────┐
-                                                               │Check for Resolve │
-                                                               └────────┬─────────┘
-                                                                        ▼
-                                                                   ┌─────────┐
-                                                                   │   END   │
-                                                                   └─────────┘
+```mermaid
+stateDiagram-v2
+   [*] --> load_history
+   load_history --> retrieve
+
+   retrieve --> evaluate_ticket: new_ticket
+   evaluate_ticket --> create_ticket
+   create_ticket --> generate
+
+   retrieve --> update_ticket: existing_ticket
+   update_ticket --> generate
+
+   generate --> store_agent_message
+   store_agent_message --> check_for_resolution
+   check_for_resolution --> [*]
 ```
 
 ### Nodes
@@ -68,7 +59,7 @@ The agent uses a LangGraph state machine with the following workflow:
 | Node | Description |
 |------|-------------|
 | `load_history` | Loads past ticket messages |
-| `priority` | Classifies the user message priority using an LLM |
+| `evaluate_ticket` | Evaluates ticket priority and metadata for new tickets |
 | `retrieve` | Fetches relevant context from Snowflake Cortex Search |
 | `generate` | Generates a support response based on priority and context |
 | `create_ticket` | Creates a new ticket in the database |
@@ -97,26 +88,12 @@ ticket_agent/
 │   │   └── nodes/                   # Individual graph nodes
 │   └── llm/
 │       └── model.py                 # LLM configuration
-├── frontend/
-│   ├── app.py                       # Global Router & Sidebar Logic
-│   ├── views/                       # Frontend View Modules
-│   │   ├── user_home.py             # User Home page with access to all features
-│   │   ├── user_chat.py             # Unified AI/Human Chat Interface
-│   │   ├── admin_dashboard.py       # Admin Queue & Filtering UI
-│   │   ├── past_tickets.py          # User Ticket History View
-│   ├── graph/
-│   │   ├── graph.py                 # LangGraph workflow definition
-│   │   ├── router.py                # Conditional routing logic
-│   │   ├── state.py                 # State schema definition
-│   │   └── nodes/                   # Individual graph nodes
-│   └── llm/
-│       └── model.py                 # LLM configuration
 ├── scripts/
 │   ├── setup_db.py                  # Database setup script
 │   └── chat_with_agent.py           # CLI chat interface
 ├── frontend/
 │   ├── app.py                       # Streamlit app entry point
-│   └── pages/                       # Streamlit app pages
+│   └── views/                       # Streamlit app pages
 ├── requirements.txt
 ├── Makefile
 └── .env.example
