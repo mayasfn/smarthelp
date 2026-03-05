@@ -17,9 +17,20 @@ def retrieve_context(state: ZenState) -> dict:
 
     resp = service.search(
         query=state["user_message"],
-        columns=["body_answer"],
+        columns=["priority", "subject", "type", "queue", "body_answer"],
         limit=5
     )
 
-    context = [r["body_answer"] for r in resp.results] if resp.results else []
+    context = []
+    if resp.results:
+        for result in resp.results:
+            priority = result.get("priority", "UNKNOWN")
+            subject = result.get("subject", "")
+            ticket_type = result.get("type", "")
+            answer = result.get("body_answer", "")
+
+            context.append(
+                f"Priority={priority}; Subject={subject}; Type={ticket_type}; Resolution={answer}"
+            )
+
     return {"context": context}

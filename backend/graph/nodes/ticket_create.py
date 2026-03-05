@@ -6,7 +6,9 @@ def create_ticket(state: ZenState) -> dict:
 
     ticket_id = repo.create_ticket(
         subject=state["user_message"][:100],
-        priority=state["priority"]
+        priority=state["priority"],
+        type=state.get("type", "Request"),
+        queue=state.get("queue", "General Inquiry")
     )
 
     repo.add_message(
