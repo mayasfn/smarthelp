@@ -1,3 +1,5 @@
+import os
+
 from backend.graph.state import ZenState
 from backend.db.zen_repo import ZenRepository
 
