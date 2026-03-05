@@ -52,11 +52,11 @@ def evaluate_ticket(state: ZenState) -> dict:
             "Subject: A brief summary of the user's issue, ideally in 5 words or less.\n"
             f"Priority levels: {priority_levels}\n"
             f"Types: {types}\n"
-            f"Queues: {queues}\n"
+            f"Queue examples: {queues}\n"
             f"User message: {state['user_message']}\n"
             f"Relevant past tickets: {context if context else 'None'}\n"
             f"Conversation history: {state.get('messages', [])}\n"
-            "Please analyze the user's message and the context to determine the appropriate labels for this supprot ticket."
+            "Please analyze the user's message and the context to determine the appropriate labels for this support ticket."
             "Return only the labels in your response, without any additional text or explanation. Format your response as: <subject>; <priority_level>; <type>; <queue>."
         )
     )
