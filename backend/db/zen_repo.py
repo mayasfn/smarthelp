@@ -1,3 +1,4 @@
+import os
 import uuid
 from backend.db.snowflake_utils import get_session
 
@@ -6,13 +7,13 @@ class ZenRepository:
     def __init__(self):
         self.session = get_session()
 
-    def create_ticket(self, subject: str, priority: str, type: str, queue: str) -> str:
+    def create_ticket(self, user: str, subject: str, priority: str, type: str, queue: str) -> str:
         ticket_id = str(uuid.uuid4())
 
         self.session.sql("""
             INSERT INTO ZEN_TICKETS
-            VALUES (?, ?, ?, ?, ?, 'OPEN', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())
-        """, params=[ticket_id, subject, priority, type, queue]).collect()
+            VALUES (?, ?, ?, ?, ?, ?, 'OPEN', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())
+        """, params=[ticket_id, user, subject, priority, type, queue]).collect()
 
         return ticket_id
 

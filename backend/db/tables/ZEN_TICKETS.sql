@@ -1,5 +1,6 @@
 CREATE TABLE ZEN_TICKETS IF NOT EXISTS (
     ticket_id STRING,
+    user STRING,
     subject STRING,
     priority STRING,
     type STRING,
