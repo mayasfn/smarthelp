@@ -1,14 +1,14 @@
 # 🎫 Ticket Agent
 
-An intelligent multi-role support ticket agent powered by **LangGraph** and **Snowflake Cortex** and **STreamlit**. This system automates the lifecycle of a support ticket—from initial AI-driven triage and priority classification to human-in-the-loop administrative resolution.
+An intelligent multi-role support ticket agent powered by **LangGraph** and **Snowflake Cortex** and **Streamlit**. This system automates the lifecycle of a support ticket—from initial AI-driven triage and priority classification to human-in-the-loop administrative resolution.
 
 ## ✨ Features
 
-- **Priority Classification** – Automatically classifies incoming messages as URGENT, HIGH, MEDIUM, or LOW priority
-- **Semantic Context Retrieval** – Uses Snowflake Cortex Search to find relevant past tickets and knowledge base articles
-- **AI-Powered Responses** – Generates helpful, context-aware support responses using LLMs
-- **Ticket Management** – Creates new tickets or updates existing conversations
-- **Conversation History** – Stores all messages for audit and continuity
+- **Smart New-Ticket Evaluation** – Evaluates new issues (priority + metadata) before ticket creation and response generation
+- **Snowflake Cortex Search** – Retrieves relevant past tickets and knowledge base context to inform responses
+- **AI + Human Support Loop** – Combines AI-generated replies with admin human-in-the-loop intervention in the same chat threads
+- **Lifecycle Tracking & Resolution** – Stores all agent messages and runs resolution checks to keep ticket status up to date
+
 
 ### 👥 **Dual-Role Interface**
 
