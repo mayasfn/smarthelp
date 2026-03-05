@@ -15,7 +15,7 @@ graph = StateGraph(ZenState)
 
 graph.add_node("load_history", load_ticket_history)
 graph.add_node("retrieve", retrieve_context)
-graph.add_node("evaluate", evaluate_ticket)
+graph.add_node("evaluate_ticket", evaluate_ticket)
 graph.add_node("create_ticket", create_ticket)
 graph.add_node("update_ticket", update_ticket)
 graph.add_node("generate", generate_response)
@@ -34,7 +34,7 @@ graph.add_conditional_edges(
     }
 )
 
-graph.add_edge("evaluate", "create_ticket")
+graph.add_edge("evaluate_ticket", "create_ticket")
 graph.add_edge("create_ticket", "generate")
 graph.add_edge("update_ticket", "generate")
 graph.add_edge("generate", "store_agent_message")

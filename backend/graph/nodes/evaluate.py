@@ -30,7 +30,7 @@ queues = [
 ]
 
 def parse_response(raw, priority_levels, types, queues):
-    priority, type, queue = [part.strip() for part in raw.split(";")]
+    subject, priority, type, queue = [part.strip() for part in raw.split(";")]
     if priority.upper() not in priority_levels:
         print(f"Invalid priority level: {priority}. Defaulting to LOW.")
         priority = "LOW"
@@ -40,15 +40,16 @@ def parse_response(raw, priority_levels, types, queues):
     if queue not in queues:
         print(f"Invalid queue: {queue}. Defaulting to General Inquiry.")
         queue = "General Inquiry"
-    return priority, type, queue
+    return subject, priority, type, queue
 
 
 def evaluate_ticket(state: ZenState) -> dict:
-    context = "\n---\n".join(state.get("context", [])[:3])    
+    context = "\n---\n".join(state.get("context", []))    
 
     msg = HumanMessage(
         content=(
-            "Classify support ticket priority, type and queue based on the user's message and relevant context from past tickets.\n"
+            "Classify support ticket subject, priority, type and queue based on the user's message and relevant context from past tickets.\n"
+            "Subject: A brief summary of the user's issue, ideally in 5 words or less.\n"
             f"Priority levels: {priority_levels}\n"
             f"Types: {types}\n"
             f"Queues: {queues}\n"
@@ -56,15 +57,16 @@ def evaluate_ticket(state: ZenState) -> dict:
             f"Relevant past tickets: {context if context else 'None'}\n"
             f"Conversation history: {state.get('messages', [])}\n"
             "Please analyze the user's message and the context to determine the appropriate labels for this supprot ticket."
-            "Return only the labels in your response, without any additional text or explanation. Format your response as: <priority_level>; <type>; <queue>."
+            "Return only the labels in your response, without any additional text or explanation. Format your response as: <subject>; <priority_level>; <type>; <queue>."
         )
     )
 
     raw = llm.invoke([msg]).content
 
-    priority, type, queue = parse_response(raw, priority_levels, types, queues)
+    subject, priority, type, queue = parse_response(raw, priority_levels, types, queues)
 
     return {
+        "subject": subject,
         "priority": priority,
         "type": type,
         "queue": queue,
