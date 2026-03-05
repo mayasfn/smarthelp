@@ -19,7 +19,6 @@ def render_admin_dashboard():
     # --- FILTERS & SORTING ---
     top_col1, top_col2, top_col3 = st.columns([2, 2, 1])
     with top_col1:
-        # Filter Toggle with visual status cues
         filter_status = st.segmented_control(
             "Filter by Status",
             options=["All", "OPEN", "CLOSED"],
@@ -36,8 +35,31 @@ def render_admin_dashboard():
         sort_order = st.radio("Order", ["DESC", "ASC"], horizontal=True)
 
     tickets = repo.get_all_tickets()
+
+    # Collect distinct values for Type and Queue filters
+    all_types = sorted({t['TYPE'] for t in tickets if t.get('TYPE')})
+    all_queues = sorted({t['QUEUE'] for t in tickets if t.get('QUEUE')})
+
+    filter_col1, filter_col2 = st.columns(2)
+    with filter_col1:
+        filter_types = st.multiselect(
+            "Filter by Type",
+            options=all_types,
+            placeholder="All types"
+        )
+    with filter_col2:
+        filter_queues = st.multiselect(
+            "Filter by Queue",
+            options=all_queues,
+            placeholder="All queues"
+        )
+
     if filter_status != "All":
         tickets = [t for t in tickets if t['STATUS'] == filter_status]
+    if filter_types:
+        tickets = [t for t in tickets if t.get('TYPE') in filter_types]
+    if filter_queues:
+        tickets = [t for t in tickets if t.get('QUEUE') in filter_queues]
 
     # Sorting Logic
     priority_map = {"URGENT": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3}
@@ -86,7 +108,19 @@ def render_admin_dashboard():
                     """, unsafe_allow_html=True)
                     
                     st.markdown(f"**Priority:** <span style='color:{p_color};'>{t['PRIORITY']}</span>", unsafe_allow_html=True)
-                    
+
+                    tag_type = t.get('TYPE') or '—'
+                    tag_queue = t.get('QUEUE') or '—'
+                    st.markdown(
+                        f"<div style='margin-top:4px; font-size:0.8rem;'>"
+                        f"<span style='background:#e0e7ff; color:#3730a3; padding:2px 8px; "
+                        f"border-radius:12px; margin-right:6px;'>🏷 {tag_type}</span>"
+                        f"<span style='background:#fef3c7; color:#92400e; padding:2px 8px; "
+                        f"border-radius:12px;'>📋 {tag_queue}</span>"
+                        f"</div>",
+                        unsafe_allow_html=True
+                    )
+
                     st.markdown(f"""
                         <p style='font-style: italic; font-size: 0.8rem; color: #666; margin-bottom: 0;'>
                             Last updated: {updated_val.strftime('%Y-%m-%d %H:%M')}

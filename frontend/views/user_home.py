@@ -134,7 +134,7 @@ def render_home():
             <div class="kb">
                 <h4>Urgent?</h4>
                 <div class="kb-item">
-                    <strong>Hotline: 3333</strong><br/>
+                    <strong>Hotline: 6767</strong><br/>
                     <small>Office hours: Mon-Fri, 9am - 7pm</small>
                 </div>
             </div>
