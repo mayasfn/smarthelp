@@ -7,7 +7,7 @@ class ZenRepository:
     def __init__(self):
         self.session = get_session()
 
-    def create_ticket(self, user: str, subject: str, priority: str, type: str, queue: str) -> str:
+    def create_ticket(self, subject: str, priority: str, type: str, queue: str) -> str:
         ticket_id = str(uuid.uuid4())
         user = os.getenv("SNOWFLAKE_USER") ## To change based on auth implementation in a prod setting
 
