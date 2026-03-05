@@ -4,7 +4,10 @@ class ZenState(TypedDict, total=False):
     ticket_id: Optional[str]
     user_message: str
 
+    subject: str
     priority: str
+    type: str
+    queue: str
     context: List[str]
     response: str
     
