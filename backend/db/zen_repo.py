@@ -9,11 +9,13 @@ class ZenRepository:
 
     def create_ticket(self, user: str, subject: str, priority: str, type: str, queue: str) -> str:
         ticket_id = str(uuid.uuid4())
+        user = os.getenv("SNOWFLAKE_USER") ## To change based on auth implementation in a prod setting
 
         self.session.sql("""
             INSERT INTO ZEN_TICKETS
             VALUES (?, ?, ?, ?, ?, ?, 'OPEN', CURRENT_TIMESTAMP(), CURRENT_TIMESTAMP())
         """, params=[ticket_id, user, subject, priority, type, queue]).collect()
+        
 
         return ticket_id
 
@@ -32,8 +34,11 @@ class ZenRepository:
         query = """
             SELECT 
                 TICKET_ID, 
+                USER,
                 SUBJECT, 
                 PRIORITY, 
+                TYPE,
+                QUEUE,
                 STATUS, 
                 CREATED_AT,
                 UPDATED_AT
@@ -41,6 +46,25 @@ class ZenRepository:
             ORDER BY UPDATED_AT DESC
         """
         results = self.session.sql(query).collect()        
+        return [row.as_dict() for row in results]
+    
+    def get_user_tickets(self):
+        user = os.getenv("SNOWFLAKE_USER") # To change based on auth implementation in a prod setting
+        query = """
+            SELECT 
+                TICKET_ID, 
+                STATUS,
+                SUBJECT, 
+                PRIORITY, 
+                TYPE,
+                QUEUE,
+                CREATED_AT,
+                UPDATED_AT
+            FROM ZEN_TICKETS 
+            WHERE USER = ?
+            ORDER BY UPDATED_AT DESC
+        """
+        results = self.session.sql(query, params=[user]).collect() 
         return [row.as_dict() for row in results]
 
     def get_ticket_status(self, ticket_id: str):

@@ -1,4 +1,6 @@
+import os
 import streamlit as st
+
 from backend.db.zen_repo import ZenRepository
 
 @st.cache_resource
@@ -10,8 +12,7 @@ def render_past_tickets():
     
     try:
         repo = get_repo()
-        tickets = repo.get_all_tickets() 
-        
+        tickets = repo.get_user_tickets()  
         if not tickets:
             st.info("You haven't created any tickets yet.")
             if st.button("Create your first ticket"):
@@ -25,6 +26,8 @@ def render_past_tickets():
                     "SUBJECT": "Issue Description",
                     "PRIORITY": st.column_config.TextColumn("Priority"),
                     "STATUS": "Status",
+                    "TYPE": "Type",
+                    "QUEUE": "Queue",
                     "CREATED_AT": st.column_config.DatetimeColumn("Date Created")
                 },
                 hide_index=True,
