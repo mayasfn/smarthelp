@@ -32,7 +32,7 @@ def render_past_tickets():
         with filter_col2:
             sort_col = st.selectbox(
                 "Sort By",
-                options=["Last updated", "Creation Date", "Priority", "Status", "Subject", "Type", "Queue"]
+                options=["Last updated", "Creation Date", "Priority", "Status", "Subject"]
             )
         with filter_col3:
             sort_order = st.radio("Order", ["DESC", "ASC"], horizontal=True)

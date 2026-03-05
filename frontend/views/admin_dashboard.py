@@ -28,7 +28,7 @@ def render_admin_dashboard():
     with top_col2:
         sort_col = st.selectbox(
             "Sort By", 
-            options=["Last updated", "Creation Date", "Priority", "Status", "Subject", "Type", "Queue"]
+            options=["Last updated", "Creation Date", "Priority", "Status", "Subject"]
         )
 
     with top_col3:
